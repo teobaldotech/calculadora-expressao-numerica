@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Calculadora de Expressões</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 30px;
+    }
+    input {
+      width: 300px;
+      padding: 8px;
+      margin-right: 10px;
+    }
+    button {
+      padding: 8px 12px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 5px;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    #resultado {
+      margin-top: 20px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calculadora de Expressões Matemáticas</h1>
+  <p>Digite uma expressão (ex: <code>(5+3)*2-4**2</code>):</p>
+  
+  <input type="text" id="expressao" placeholder="Digite a expressão aqui">
+  <button onclick="calcular()">Calcular</button>
+  
+  <div id="resultado"></div>
+  
+  <script>
+    function calcular() {
+      const expr = document.getElementById("expressao").value;
+      try {
+        const resultado = eval(expr); // avalia a expressão
+        document.getElementById("resultado").innerText = "Resultado: " + resultado;
+      } catch (e) {
+        document.getElementById("resultado").innerText = "Erro na expressão!";
+      }
+    }
+  </script>
+</body>
+</html>
