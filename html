@@ -1,54 +1,95 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Calculadora de Expressões</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 30px;
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Resolvedor de Expressão Numérica</title>
+
+<style>
+    body{
+        font-family: Arial, Helvetica, sans-serif;
+        background:#0f172a;
+        color:#fff;
+        display:flex;
+        justify-content:center;
+        align-items:center;
+        height:100vh;
+        margin:0;
     }
-    input {
-      width: 300px;
-      padding: 8px;
-      margin-right: 10px;
+    .box{
+        background:#1e293b;
+        padding:25px;
+        border-radius:12px;
+        width:95%;
+        max-width:420px;
+        box-shadow:0 0 20px #000;
+        text-align:center;
     }
-    button {
-      padding: 8px 12px;
-      background-color: #4CAF50;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
+    h1{
+        margin-bottom:15px;
+        font-size:22px;
     }
-    button:hover {
-      background-color: #45a049;
+    input{
+        width:100%;
+        padding:12px;
+        font-size:18px;
+        border-radius:8px;
+        border:none;
+        outline:none;
+        margin-bottom:15px;
     }
-    #resultado {
-      margin-top: 20px;
-      font-weight: bold;
+    button{
+        width:100%;
+        padding:12px;
+        font-size:18px;
+        border:none;
+        border-radius:8px;
+        background:#22c55e;
+        color:#000;
+        cursor:pointer;
+        font-weight:bold;
     }
-  </style>
+    button:hover{
+        background:#16a34a;
+    }
+    #resultado{
+        margin-top:20px;
+        font-size:20px;
+        font-weight:bold;
+        color:#38bdf8;
+        min-height:28px;
+    }
+</style>
 </head>
 <body>
-  <h1>Calculadora de Expressões Matemáticas</h1>
-  <p>Digite uma expressão (ex: <code>(5+3)*2-4**2</code>):</p>
-  
-  <input type="text" id="expressao" placeholder="Digite a expressão aqui">
-  <button onclick="calcular()">Calcular</button>
-  
-  <div id="resultado"></div>
-  
-  <script>
-    function calcular() {
-      const expr = document.getElementById("expressao").value;
-      try {
-        const resultado = eval(expr); // avalia a expressão
+
+<div class="box">
+    <h1>Expressão Numérica</h1>
+    <input type="text" id="expr" placeholder="Ex: (5+3)*2^3-10/2">
+    <button onclick="resolver()">Calcular</button>
+    <div id="resultado"></div>
+</div>
+
+<script>
+function resolver(){
+    let expr = document.getElementById("expr").value;
+
+    // troca ^ por ** para potência
+    expr = expr.replace(/\^/g, "**");
+
+    try{
+        // valida caracteres permitidos
+        if(!/^[0-9+\-*/().\s*]+$/.test(expr)){
+            throw "Expressão inválida!";
+        }
+
+        let resultado = Function('"use strict"; return (' + expr + ')')();
         document.getElementById("resultado").innerText = "Resultado: " + resultado;
-      } catch (e) {
+    }catch(e){
         document.getElementById("resultado").innerText = "Erro na expressão!";
-      }
     }
-  </script>
+}
+</script>
+
 </body>
 </html>
