@@ -3,90 +3,163 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Resolvedor de Expressão Numérica</title>
+<title>Expressão Numérica com Resolução</title>
 
 <style>
-    body{
-        font-family: Arial, Helvetica, sans-serif;
-        background:#0f172a;
-        color:#fff;
-        display:flex;
-        justify-content:center;
-        align-items:center;
-        height:100vh;
-        margin:0;
-    }
-    .box{
-        background:#1e293b;
-        padding:25px;
-        border-radius:12px;
-        width:95%;
-        max-width:420px;
-        box-shadow:0 0 20px #000;
-        text-align:center;
-    }
-    h1{
-        margin-bottom:15px;
-        font-size:22px;
-    }
-    input{
-        width:100%;
-        padding:12px;
-        font-size:18px;
-        border-radius:8px;
-        border:none;
-        outline:none;
-        margin-bottom:15px;
-    }
-    button{
-        width:100%;
-        padding:12px;
-        font-size:18px;
-        border:none;
-        border-radius:8px;
-        background:#22c55e;
-        color:#000;
-        cursor:pointer;
-        font-weight:bold;
-    }
-    button:hover{
-        background:#16a34a;
-    }
-    #resultado{
-        margin-top:20px;
-        font-size:20px;
-        font-weight:bold;
-        color:#38bdf8;
-        min-height:28px;
-    }
+body{
+    font-family: Arial, Helvetica, sans-serif;
+    background:#0f172a;
+    color:#fff;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    margin:0;
+}
+.box{
+    background:#1e293b;
+    padding:25px;
+    border-radius:12px;
+    width:95%;
+    max-width:500px;
+    box-shadow:0 0 20px #000;
+}
+input{
+    width:100%;
+    padding:12px;
+    font-size:18px;
+    border-radius:8px;
+    border:none;
+    margin-bottom:15px;
+}
+button{
+    width:100%;
+    padding:12px;
+    font-size:18px;
+    border:none;
+    border-radius:8px;
+    background:#22c55e;
+    font-weight:bold;
+    cursor:pointer;
+}
+#passos{
+    margin-top:20px;
+    font-size:16px;
+    line-height:1.6;
+    color:#cbd5e1;
+}
+#resultado{
+    margin-top:15px;
+    font-size:20px;
+    font-weight:bold;
+    color:#38bdf8;
+}
 </style>
 </head>
 <body>
 
 <div class="box">
-    <h1>Expressão Numérica</h1>
+    <h2>Expressão Numérica</h2>
     <input type="text" id="expr" placeholder="Ex: (5+3)*2^3-10/2">
     <button onclick="resolver()">Calcular</button>
+
+    <div id="passos"></div>
     <div id="resultado"></div>
 </div>
 
 <script>
+const prioridade = {'+':1,'-':1,'*':2,'/':2,'^':3};
+let passos = [];
+
+function aplicarOperador(a, b, op){
+    a = parseFloat(a);
+    b = parseFloat(b);
+    let r;
+
+    switch(op){
+        case '+': r = a + b; break;
+        case '-': r = a - b; break;
+        case '*': r = a * b; break;
+        case '/': r = a / b; break;
+        case '^': r = Math.pow(a, b); break;
+    }
+
+    passos.push(`${a} ${op} ${b} = ${r}`);
+    return r;
+}
+
+function resolverExpressao(tokens){
+    let valores = [];
+    let ops = [];
+
+    for(let token of tokens){
+        if(!isNaN(token)){
+            valores.push(token);
+        }
+        else if(token === '('){
+            ops.push(token);
+        }
+        else if(token === ')'){
+            while(ops.length && ops[ops.length-1] !== '('){
+                processar(valores, ops);
+            }
+            ops.pop();
+        }
+        else{
+            while(ops.length && prioridade[ops[ops.length-1]] >= prioridade[token]){
+                processar(valores, ops);
+            }
+            ops.push(token);
+        }
+    }
+
+    while(ops.length){
+        processar(valores, ops);
+    }
+
+    return valores[0];
+}
+
+function processar(valores, ops){
+    let op = ops.pop();
+    let b = valores.pop();
+    let a = valores.pop();
+    let r = aplicarOperador(a, b, op);
+    valores.push(r);
+}
+
+function tokenizar(expr){
+    return expr.replace(/\s+/g,'')
+               .match(/(\d+(\.\d+)?|[()+\-*/^])/g);
+}
+
 function resolver(){
-    let expr = document.getElementById("expr").value;
-
-    // troca ^ por ** para potência
-    expr = expr.replace(/\^/g, "**");
-
     try{
-        // valida caracteres permitidos
-        if(!/^[0-9+\-*/().\s*]+$/.test(expr)){
-            throw "Expressão inválida!";
+        passos = [];
+        document.getElementById("passos").innerHTML = "";
+        document.getElementById("resultado").innerText = "";
+
+        let expr = document.getElementById("expr").value;
+
+        if(!/^[0-9+\-*/().^\s]+$/.test(expr)){
+            throw "Inválido";
         }
 
-        let resultado = Function('"use strict"; return (' + expr + ')')();
-        document.getElementById("resultado").innerText = "Resultado: " + resultado;
-    }catch(e){
-        document.getElementById("resultado").innerText = "Erro na expressão!";
+        let tokens = tokenizar(expr);
+        let resultado = resolverExpressao(tokens);
+
+        let htmlPassos = "<b>Resolução na ordem correta:</b><br><br>";
+        passos.forEach((p,i)=>{
+            htmlPassos += `Passo ${i+1}: ${p}<br>`;
+        });
+
+        document.getElementById("passos").innerHTML = htmlPassos;
+        document.getElementById("resultado").innerText =
+            "Resultado Final: " + resultado;
+    }
+    catch{
+        document.getElementById("resultado").innerText =
+            "Erro na expressão!";
     }
 }
 </script>
